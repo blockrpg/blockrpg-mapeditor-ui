@@ -42,7 +42,18 @@
 
 <template>
   <div class="map-editor">
-    <div class="header-box"></div>
+    <div class="header-box">
+      <el-select
+        v-model="mapId"
+        placeholder="请选择地图">
+        <el-option label="test" value="test"></el-option>
+      </el-select>
+      <el-select
+        v-model="imageId"
+        placeholder="请选择素材图Id">
+        <el-option label="0" value="0"></el-option>
+      </el-select>
+    </div>
     <div class="content-box">
       <div class="left-wraper">
         <mapSelector
@@ -75,6 +86,8 @@ export default {
       curSelectMap: {},
       //#endregion
       //#region 页面内容绑定数据
+      imageId: '',
+      mapId: '',
       //#endregion
       //#region 页面样式绑定数据
       //#endregion
