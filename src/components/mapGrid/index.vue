@@ -1,21 +1,37 @@
 <!--局部样式-->
-<style scoped></style>
+<style lang="scss" scoped>
+.map-grid {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+</style>
 
 <!--全局局部覆盖样式-->
 <style></style>
 
 <template>
-  <div>
-    <mapEditor />
+  <div
+    class="map-grid"
+    :style="autoStyle">
   </div>
 </template>
 
 <script>
-import mapEditor from '@/components/mapEditor';
-
 export default {
-  name: 'view-home',
-  props: {},
+  name: 'mapGrid',
+  props: {
+    value: {
+      type: Object,
+      default() {
+        return {
+          resId: 0,
+          resNum: 1,
+          pass: true,
+        };
+      },
+    },
+  },
   data() {
     return {
       //#region 页面对象
@@ -33,6 +49,19 @@ export default {
     //#region 数据转换计算属性
     //#endregion
     //#region 样式计算属性
+    // 自动计算样式
+    autoStyle() {
+      const x = (this.value.resNum - 1) % 8;
+      const y = Math.floor((this.value.resNum - 1) / 8);
+      const style = {};
+      style['background'] = `
+        url('/image/map/${this.value.resId}.png')
+        no-repeat
+        -${x * 32}px
+        -${y * 32}px
+      `;
+      return style;
+    },
     //#endregion
   },
   methods: {
@@ -51,8 +80,6 @@ export default {
   },
   created() {},
   mounted() {},
-  components: {
-    mapEditor,
-  },
+  components: {},
 };
 </script>

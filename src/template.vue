@@ -1,5 +1,6 @@
 <!--局部样式-->
-<style scoped></style>
+<style lang="scss" scoped>
+</style>
 
 <!--全局局部覆盖样式-->
 <style></style>
