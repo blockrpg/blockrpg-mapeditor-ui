@@ -9,6 +9,9 @@
   .header-box {
     height: 40px;
     border-bottom: solid 1px #333;
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
   }
   .content-box {
     height: 540px;
@@ -50,7 +53,8 @@
       </el-select>
       <el-select
         v-model="imageId"
-        placeholder="请选择素材图Id">
+        placeholder="请选择素材图Id"
+        style="margin-left: 10px">
         <el-option label="0" value="0"></el-option>
       </el-select>
     </div>
@@ -61,7 +65,12 @@
         />
       </div>
       <div class="right-wraper">
-        <div class="map-space"></div>
+        <div class="map-space">
+          <!-- <div style="padding-left: 6px;padding-top: 24px" v-for="i in 13" :key="i" style="height: 32px">
+            <mapGrid v-for="j in 22" :key="`${i}${j}`" />
+          </div> -->
+          <mapView />
+        </div>
         <div class="tools-box">
           <mapGrid
             :value="curSelectMap"
@@ -76,6 +85,7 @@
 <script>
 import mapSelector from '@/components/mapSelector';
 import mapGrid from '@/components/mapGrid';
+import mapView from '@/components/mapView';
 
 export default {
   name: 'map-editor',
@@ -124,6 +134,7 @@ export default {
   components: {
     mapSelector,
     mapGrid,
+    mapView,
   },
 };
 </script>
