@@ -86,6 +86,8 @@ export default {
       startY: 0,
       // 当前渲染的网格
       grids: [],
+
+      enable: true,
       //#endregion
       //#region 页面样式绑定数据
       //#endregion
@@ -95,7 +97,10 @@ export default {
     // 当前视区覆盖的区块矩形
     autoBlockRect: {
       handler(nv, ov) {
-        this.updateMap(nv);
+        if (this.enable) {
+          this.enable = false;
+          this.updateMap(nv);
+        }
       },
       immediate: true,
     },
