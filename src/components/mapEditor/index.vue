@@ -69,7 +69,9 @@
           <!-- <div style="padding-left: 6px;padding-top: 24px" v-for="i in 13" :key="i" style="height: 32px">
             <mapGrid v-for="j in 22" :key="`${i}${j}`" />
           </div> -->
-          <mapView />
+          <mapView
+            :curGrid="curSelectMap"
+          />
         </div>
         <div class="tools-box">
           <mapGrid

@@ -27,7 +27,6 @@
     left: 0px;
     width: 32px;
     height: 32px;
-    border-radius: 2px;
     background-color: rgba(0, 0, 0, 0.3);
     z-index: 3;
   }

@@ -4,19 +4,16 @@
   position: relative;
   width: 100%;
   height: 100%;
-  .span-text {
+  overflow: hidden;
+  .grids-wraper {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    padding: 0px 2px 0px 2px;
-    border: solid 1px #333;
-    background-color: rgba(255, 255, 255, 0.2);
+    .map-grid {
+      position: absolute;
+    }
+    .map-grid:hover {
+      filter: brightness(0.7);
+    }
   }
-}
-.test-grid {
-  position: absolute;
-  top: 204px;
-  left: 339px;
 }
 </style>
 
@@ -25,20 +22,23 @@
 
 <template>
   <div
+    v-loading="loading"
     class="map-view"
     @mousedown="handleMouseDown"
     @mousemove="handleMouseMove"
     @mouseup="handleMouseUp">
-    <mapGrid
-      class="test-grid"
-      v-for="grid in grids"
-      :key="grid.id"
-      :value="grid"
-    />
-    <span
-      class="span-text">
-      {{`x:${centerX} y:${centerY}`}}
-    </span>
+    <div
+      class="grids-wraper"
+      :style="autoWraperStyle">
+      <mapGrid
+        class="map-grid"
+        v-for="grid in grids"
+        :key="grid.id"
+        :value="grid"
+        :style="gridStyle(grid)"
+        @click.native="handleGridClick(grid)"
+      />
+    </div>
   </div>
 </template>
 
@@ -48,7 +48,6 @@ import { Rect } from 'blockrpg-core/built/Rect';
 import { Point } from 'blockrpg-core/built/Point';
 import { Space } from 'blockrpg-core/built/Space';
 import * as APIMapEditor from '@/api/mapEditor';
-
 
 // 可视区域宽度
 const ViewWidth = 710;
@@ -61,19 +60,31 @@ function further(num) {
 
 export default {
   name: 'map-view',
-  props: {},
+  props: {
+    // 当前选中的网格
+    curGrid: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+  },
   data() {
     return {
       //#region 页面对象
+      loading: true,
       // 块缓存
       blockBuffer: {},
       //#endregion
       //#region 页面内容绑定数据
       // 初始的中心点坐标为(0, 0)
+      // 随着拖拽，中心点坐标会变化
       centerX: 0,
       centerY: 0,
+      // 记录拖拽事件的初始坐标
       startX: 0,
       startY: 0,
+      // 当前渲染的网格
       grids: [],
       //#endregion
       //#region 页面样式绑定数据
@@ -93,6 +104,7 @@ export default {
     //#region 常量计算属性
     //#endregion
     //#region 数据转换计算属性
+    // 视口的像素范围
     autoPixelRect() {
       const halfWidth = ViewWidth / 2;
       const halfHeight = ViewHeight / 2;
@@ -106,12 +118,14 @@ export default {
       );
       return rect;
     },
+    // 视口的网格范围
     autoGridRect() {
       return Rect.FromTwoPoints(
         this.PixelToGrid(this.autoPixelRect.Point1),
         this.PixelToGrid(this.autoPixelRect.Point2),
       );
     },
+    // 视口的Block范围
     autoBlockRect() {
       return Rect.FromTwoPoints(
         Space.GridToBlock(this.autoGridRect.Point1),
@@ -120,43 +134,77 @@ export default {
     },
     //#endregion
     //#region 样式计算属性
+    // 自动计算包裹区域样式
+    autoWraperStyle() {
+      const style = {};
+      style.transform = `translate(${-this.centerX}px, ${-this.centerY}px)`;
+      return style;
+    },
     //#endregion
   },
   methods: {
     //#region 页面事件方法
+    // 鼠标按下
+    // 记录按下位置
     handleMouseDown(e) {
       this.startX = e.clientX - this.$el.offsetLeft;
       this.startY = e.clientY - this.$el.offsetTop;
     },
+    // 鼠标移动中事件
     handleMouseMove(e) {
       const moveX = e.clientX - this.$el.offsetLeft;
       const moveY = e.clientY - this.$el.offsetTop;
     },
+    // 鼠标松开
+    // 计算位置差之后偏移中心点
     handleMouseUp(e) {
       const endX = e.clientX - this.$el.offsetLeft;
       const endY = e.clientY - this.$el.offsetTop;
       const diffX = endX - this.startX;
       const diffY = endY - this.startY;
-      this.centerX += diffX;
-      this.centerY += diffY;
+      this.centerX -= diffX;
+      this.centerY -= diffY;
+    },
+    // 网格点击事件
+    handleGridClick(grid) {
+      // console.log(grid);
+      // console.log(this.curGrid);
+      const gridPt = new Point(grid.x, grid.y);
+      const info = this.getBlockCoordinate(gridPt);
+      const blockId = info.Block.Id;
+      const offset = info.Offset;
+      this.blockBuffer[blockId].grids[offset] = {
+        pass: this.curGrid.pass,
+        resId: this.curGrid.resId,
+        resNum: this.curGrid.resNum,
+      };
+      this.grids = this.readGridsFromBufferRect(this.autoGridRect);
     },
     //#endregion
     //#region 业务逻辑方法
+    // 请求后端接口更新地图
     async updateMap(rect) {
-      const result = await APIMapEditor.queryRect({
-        mapId: 'test',
-        ...rect,
-      });
-      if (result.success) {
-        const list = result.object || [];
-        // 把获取的block写入缓存
-        list.forEach((item) => {
-          const key = `${item.x}~${item.y}`;
-          this.blockBuffer[key] = item;
+      this.loading = true;
+      try {
+        const result = await APIMapEditor.queryRect({
+          mapId: 'test',
+          ...rect,
         });
-        this.grids = this.readGridsFromBufferRect(this.autoGridRect);
-        console.log(this.grids);
+        if (result.success) {
+          const list = result.object || [];
+          // 把获取的block写入缓存
+          list.forEach((item) => {
+            const key = `${item.x}~${item.y}`;
+            this.blockBuffer[key] = item;
+          });
+          this.grids = this.readGridsFromBufferRect(this.autoGridRect);
+        }
+      } catch (e) {
+        console.error(e);
       }
+      this.$nextTick(() => {
+        this.loading = false;
+      });
     },
     //#endregion
     //#region 接口访问方法
@@ -171,6 +219,14 @@ export default {
     },
     //#endregion
     //#region 自动样式方法
+    // 自动计算网格样式（位置）
+    gridStyle(grid) {
+      const style = {};
+      const cx = 339;
+      const cy = 204;
+      style['transform'] = `translate(${cx + grid.x * 32}px, ${cy + grid.y * 32}px)`;
+      return style;
+    },
     //#endregion
     //#region 其他方法
     // 获取网格所属的Block坐标点和Block内偏移信息
