@@ -70,15 +70,17 @@ export default {
     //#region 样式计算属性
     // 自动计算MapGrid样式
     autoMapStyle() {
-      const x = (this.autoMap.resNum - 1) % 8;
-      const y = Math.floor((this.autoMap.resNum - 1) / 8);
       const style = {};
-      style['background'] = `
-        url('/image/map/${this.autoMap.resId}.png')
-        no-repeat
-        -${x * 32}px
-        -${y * 32}px
-      `;
+      if (this.autoMap.resNum > 0) {
+        const x = (this.autoMap.resNum - 1) % 8;
+        const y = Math.floor((this.autoMap.resNum - 1) / 8);
+        style['background'] = `
+          url('/image/map/${this.autoMap.resId}.png')
+          no-repeat
+          -${x * 32}px
+          -${y * 32}px
+        `;
+      }
       if (this.border) {
         style['box-sizing'] = 'border-box';
         style['border-right'] = 'solid 1px rgba(0, 0, 0, 0.2)';
@@ -88,15 +90,17 @@ export default {
     },
     // 自动计算PropGrid样式
     autoPropStyle() {
-      const x = (this.autoProp.resNum - 1) % 8;
-      const y = Math.floor((this.autoProp.resNum - 1) / 8);
       const style = {};
-      style['background'] = `
-        url('/image/map/${this.autoProp.resId}.png')
-        no-repeat
-        -${x * 32}px
-        -${y * 32}px
-      `;
+      if (this.autoProp.resNum > 0) {
+        const x = (this.autoProp.resNum - 1) % 8;
+        const y = Math.floor((this.autoProp.resNum - 1) / 8);
+        style['background'] = `
+          url('/image/map/${this.autoProp.resId}.png')
+          no-repeat
+          -${x * 32}px
+          -${y * 32}px
+        `;
+      }
       return style;
     },
     //#endregion

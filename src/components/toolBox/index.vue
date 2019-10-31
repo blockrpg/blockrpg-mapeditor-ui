@@ -47,7 +47,7 @@
         @click="handleClick(tool.key)"
         v-for="tool in toolList"
         :key="tool.key">
-        拖
+        {{tool.name}}
       </div>
     </div>
   </div>
@@ -66,9 +66,11 @@ export default {
     return {
       //#region 页面对象
       toolList: [
-        { key: '1', name: '拖' },
-        { key: '2', name: '拖' },
-        { key: '3', name: '拖' },
+        { key: 'pencil', name: '笔', },
+        { key: 'hand', name: '拖', },
+        { key: 'eyedropper', name: '吸', },
+        { key: 'editor', name: '编', },
+        { key: 'eraser', name: '橡', },
       ],
       //#endregion
       //#region 页面内容绑定数据

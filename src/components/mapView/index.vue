@@ -63,10 +63,17 @@ export default {
   name: 'map-view',
   props: {
     // 当前选中的网格
-    curGrid: {
+    curImg: {
       type: Object,
       default() {
         return {};
+      },
+    },
+    // 当前选中的工具
+    curTool: {
+      type: String,
+      default() {
+        return '';
       },
     },
   },
@@ -150,50 +157,70 @@ export default {
   },
   methods: {
     //#region 页面事件方法
-    // 鼠标按下
-    // 记录按下位置
+    // 鼠标按下事件
     handleMouseDown(e) {
-      this.startX = e.clientX - this.$el.offsetLeft;
-      this.startY = e.clientY - this.$el.offsetTop;
+      // 记录按下位置
+      if (this.curTool === 'hand') {
+        this.startX = e.clientX - this.$el.offsetLeft;
+        this.startY = e.clientY - this.$el.offsetTop;
+      }
     },
     // 鼠标移动中事件
     handleMouseMove(e) {
-      const moveX = e.clientX - this.$el.offsetLeft;
-      const moveY = e.clientY - this.$el.offsetTop;
+      if (this.curTool === 'hand') {
+        const moveX = e.clientX - this.$el.offsetLeft;
+        const moveY = e.clientY - this.$el.offsetTop;
+      }
     },
     // 鼠标松开
-    // 计算位置差之后偏移中心点
     handleMouseUp(e) {
-      const endX = e.clientX - this.$el.offsetLeft;
-      const endY = e.clientY - this.$el.offsetTop;
-      const diffX = endX - this.startX;
-      const diffY = endY - this.startY;
-      this.centerX -= diffX;
-      this.centerY -= diffY;
+      // 计算位置差之后偏移中心点
+      if (this.curTool === 'hand') {
+        const endX = e.clientX - this.$el.offsetLeft;
+        const endY = e.clientY - this.$el.offsetTop;
+        const diffX = endX - this.startX;
+        const diffY = endY - this.startY;
+        this.centerX -= diffX;
+        this.centerY -= diffY;
+      }
     },
     // 网格点击事件
     handleGridMouseDown(grid, e) {
-      // 分别处理鼠标左右键事件
-      if (e.button === 0) {
-        console.log('左键');
-      } else if (e.button === 2) {
+      const button = e.button;
+      const gridPt = new Point(grid.x, grid.y);
+      const info = this.getBlockCoordinate(gridPt);
+      const blockId = info.Block.Id;
+      const offset = info.Offset;
+      if (this.curTool === 'pencil') {
+        if (button === 0) {
+          this.blockBuffer[blockId].grids[offset].map = {
+            resId: this.curImg.resId,
+            resNum: this.curImg.resNum,
+          };
+        } else if (button === 2) {
+          this.blockBuffer[blockId].grids[offset].prop = {
+            resId: this.curImg.resId,
+            resNum: this.curImg.resNum,
+          };
+        }
+        this.grids = this.readGridsFromBufferRect(this.autoGridRect);
+      } else if (this.curTool === 'eyedropper') {
         this.$emit('absorb', {
           map: grid.map,
           prop: grid.prop,
         });
+      } else if (this.curTool === 'eraser') {
+        if (button === 0) {
+          this.blockBuffer[blockId].grids[offset].map = {
+            resId: 0,
+            resNum: 0,
+            passMask: 0,
+          };
+        } else if (button === 2) {
+          delete this.blockBuffer[blockId].grids[offset].prop;
+        }
+        this.grids = this.readGridsFromBufferRect(this.autoGridRect);
       }
-      // // console.log(grid);
-      // // console.log(this.curGrid);
-      // const gridPt = new Point(grid.x, grid.y);
-      // const info = this.getBlockCoordinate(gridPt);
-      // const blockId = info.Block.Id;
-      // const offset = info.Offset;
-      // this.blockBuffer[blockId].grids[offset] = {
-      //   pass: this.curGrid.pass,
-      //   resId: this.curGrid.resId,
-      //   resNum: this.curGrid.resNum,
-      // };
-      // this.grids = this.readGridsFromBufferRect(this.autoGridRect);
     },
     //#endregion
     //#region 业务逻辑方法

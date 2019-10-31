@@ -33,6 +33,7 @@
         align-items: flex-start;
         height: 100px;
         border-top: solid 1px #333;
+        overflow-y: auto;
       }
     }
   }
@@ -70,6 +71,8 @@
       <div class="right-wraper">
         <div class="map-space">
           <mapView
+            :curImg="curImg"
+            :curTool="curTool"
             @absorb="handleMapViewAbsorb"
           />
         </div>
@@ -78,7 +81,10 @@
             :curImg="curImg"
             :curGrid="curGrid"
           />
-          <toolBox />
+          <gridEditor />
+          <toolBox
+            v-model="curTool"
+          />
         </div>
       </div>
     </div>
@@ -92,6 +98,7 @@ import mapGrid from '@/components/mapGrid';
 import mapView from '@/components/mapView';
 import palette from '@/components/palette';
 import toolBox from '@/components/toolBox';
+import gridEditor from '@/components/gridEditor';
 
 export default {
   name: 'map-editor',
@@ -103,6 +110,8 @@ export default {
       curImg: {},
       // 当前吸取的网格数据
       curGrid: {},
+      // 当前选中的工具
+      curTool: 'pencil',
       //#endregion
       //#region 页面内容绑定数据
       imageId: '',
@@ -157,6 +166,7 @@ export default {
     mapView,
     palette,
     toolBox,
+    gridEditor,
   },
 };
 </script>
