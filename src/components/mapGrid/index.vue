@@ -4,6 +4,10 @@
   display: inline-block;
   width: 32px;
   height: 32px;
+  .prop-grid {
+    width: 32px;
+    height: 32px;
+  }
 }
 </style>
 
@@ -13,7 +17,12 @@
 <template>
   <div
     class="map-grid"
-    :style="autoStyle">
+    :style="autoMapStyle">
+    <div
+      v-if="autoProp"
+      class="prop-grid"
+      :style="autoPropStyle">
+    </div>
   </div>
 </template>
 
@@ -24,11 +33,7 @@ export default {
     value: {
       type: Object,
       default() {
-        return {
-          resId: 0,
-          resNum: 1,
-          pass: true,
-        };
+        return {};
       },
     },
   },
@@ -47,15 +52,38 @@ export default {
     //#region 常量计算属性
     //#endregion
     //#region 数据转换计算属性
+    autoMap() {
+      return ((this.value || {}).map || {
+        resId: 0,
+        resNum: 0,
+        passMask: 0,
+      });
+    },
+    autoProp() {
+      return ((this.value || {}).prop || undefined);
+    },
     //#endregion
     //#region 样式计算属性
-    // 自动计算样式
-    autoStyle() {
-      const x = (this.value.resNum - 1) % 8;
-      const y = Math.floor((this.value.resNum - 1) / 8);
+    // 自动计算MapGrid样式
+    autoMapStyle() {
+      const x = (this.autoMap.resNum - 1) % 8;
+      const y = Math.floor((this.autoMap.resNum - 1) / 8);
       const style = {};
       style['background'] = `
-        url('/image/map/${this.value.resId}.png')
+        url('/image/map/${this.autoMap.resId}.png')
+        no-repeat
+        -${x * 32}px
+        -${y * 32}px
+      `;
+      return style;
+    },
+    // 自动计算PropGrid样式
+    autoPropStyle() {
+      const x = (this.autoProp.resNum - 1) % 8;
+      const y = Math.floor((this.autoProp.resNum - 1) / 8);
+      const style = {};
+      style['background'] = `
+        url('/image/map/${this.autoProp.resId}.png')
         no-repeat
         -${x * 32}px
         -${y * 32}px

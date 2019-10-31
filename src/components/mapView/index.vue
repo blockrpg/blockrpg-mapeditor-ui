@@ -98,7 +98,7 @@ export default {
     autoBlockRect: {
       handler(nv, ov) {
         if (this.enable) {
-          this.enable = false;
+          // this.enable = false;
           this.updateMap(nv);
         }
       },
