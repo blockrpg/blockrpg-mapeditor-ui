@@ -36,7 +36,8 @@
         :key="grid.id"
         :value="grid"
         :style="gridStyle(grid)"
-        @click.native="handleGridClick(grid)"
+        :border="true"
+        @mousedown.native="handleGridMouseDown(grid, $event)"
       />
     </div>
   </div>
@@ -171,19 +172,28 @@ export default {
       this.centerY -= diffY;
     },
     // 网格点击事件
-    handleGridClick(grid) {
-      // console.log(grid);
-      // console.log(this.curGrid);
-      const gridPt = new Point(grid.x, grid.y);
-      const info = this.getBlockCoordinate(gridPt);
-      const blockId = info.Block.Id;
-      const offset = info.Offset;
-      this.blockBuffer[blockId].grids[offset] = {
-        pass: this.curGrid.pass,
-        resId: this.curGrid.resId,
-        resNum: this.curGrid.resNum,
-      };
-      this.grids = this.readGridsFromBufferRect(this.autoGridRect);
+    handleGridMouseDown(grid, e) {
+      // 分别处理鼠标左右键事件
+      if (e.button === 0) {
+        console.log('左键');
+      } else if (e.button === 2) {
+        this.$emit('absorb', {
+          map: grid.map,
+          prop: grid.prop,
+        });
+      }
+      // // console.log(grid);
+      // // console.log(this.curGrid);
+      // const gridPt = new Point(grid.x, grid.y);
+      // const info = this.getBlockCoordinate(gridPt);
+      // const blockId = info.Block.Id;
+      // const offset = info.Offset;
+      // this.blockBuffer[blockId].grids[offset] = {
+      //   pass: this.curGrid.pass,
+      //   resId: this.curGrid.resId,
+      //   resNum: this.curGrid.resNum,
+      // };
+      // this.grids = this.readGridsFromBufferRect(this.autoGridRect);
     },
     //#endregion
     //#region 业务逻辑方法

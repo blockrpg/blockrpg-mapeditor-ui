@@ -4,9 +4,6 @@
   display: inline-block;
   width: 32px;
   height: 32px;
-  box-sizing: border-box;
-  border-right: solid 1px rgba(0, 0, 0, 0.2);
-  border-bottom: solid 1px rgba(0, 0, 0, 0.2);
   .prop-grid {
     width: 32px;
     height: 32px;
@@ -38,6 +35,10 @@ export default {
       default() {
         return {};
       },
+    },
+    border: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -78,6 +79,11 @@ export default {
         -${x * 32}px
         -${y * 32}px
       `;
+      if (this.border) {
+        style['box-sizing'] = 'border-box';
+        style['border-right'] = 'solid 1px rgba(0, 0, 0, 0.2)';
+        style['border-bottom'] = 'solid 1px rgba(0, 0, 0, 0.2)';
+      }
       return style;
     },
     // 自动计算PropGrid样式

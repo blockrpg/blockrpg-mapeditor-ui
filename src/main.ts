@@ -14,9 +14,9 @@ Vue.prototype.$message = ElementUI.Message;
 
 Vue.config.productionTip = false;
 
-Vue.prototype.$ELEMENT = { size: 'mini', zIndex: 3000 };
-
-Vue.use(ElementUI);
+Vue.use(ElementUI, {
+  size: 'mini',
+});
 
 new Vue({
   router,

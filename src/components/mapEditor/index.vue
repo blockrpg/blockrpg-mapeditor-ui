@@ -28,6 +28,9 @@
         height: 440px;
       }
       .tools-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
         height: 100px;
         border-top: solid 1px #333;
       }
@@ -66,17 +69,16 @@
       </div>
       <div class="right-wraper">
         <div class="map-space">
-          <!-- <div style="padding-left: 6px;padding-top: 24px" v-for="i in 13" :key="i" style="height: 32px">
-            <mapGrid v-for="j in 22" :key="`${i}${j}`" />
-          </div> -->
           <mapView
-            :curGrid="curSelectMap"
+            @absorb="handleMapViewAbsorb"
           />
         </div>
         <div class="tools-box">
-          <mapGrid
-            :value="curSelectMap"
+          <palette
+            :curImg="curImg"
+            :curGrid="curGrid"
           />
+          <toolBox />
         </div>
       </div>
     </div>
@@ -88,6 +90,8 @@
 import mapSelector from '@/components/mapSelector';
 import mapGrid from '@/components/mapGrid';
 import mapView from '@/components/mapView';
+import palette from '@/components/palette';
+import toolBox from '@/components/toolBox';
 
 export default {
   name: 'map-editor',
@@ -95,7 +99,10 @@ export default {
   data() {
     return {
       //#region 页面对象
-      curSelectMap: {},
+      // 当前选中的素材数据
+      curImg: {},
+      // 当前吸取的网格数据
+      curGrid: {},
       //#endregion
       //#region 页面内容绑定数据
       imageId: '',
@@ -117,7 +124,13 @@ export default {
   methods: {
     //#region 页面事件方法
     handleSelectChange(value) {
-      this.curSelectMap = value;
+      this.curImg = {
+        resId: value.resId,
+        resNum: value.resNum,
+      };
+    },
+    handleMapViewAbsorb(value) {
+      this.curGrid = JSON.parse(JSON.stringify(value));
     },
     //#endregion
     //#region 业务逻辑方法
@@ -132,11 +145,18 @@ export default {
     //#endregion
   },
   created() {},
-  mounted() {},
+  mounted() {
+    // 禁用鼠标右键事件
+    this.$el.oncontextmenu = function () {
+      event.returnValue = false;
+    };
+  },
   components: {
     mapSelector,
     mapGrid,
     mapView,
+    palette,
+    toolBox,
   },
 };
 </script>
