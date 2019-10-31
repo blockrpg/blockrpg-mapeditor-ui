@@ -4,6 +4,9 @@
   display: inline-block;
   width: 32px;
   height: 32px;
+  box-sizing: border-box;
+  border-right: solid 1px rgba(0, 0, 0, 0.2);
+  border-bottom: solid 1px rgba(0, 0, 0, 0.2);
   .prop-grid {
     width: 32px;
     height: 32px;
