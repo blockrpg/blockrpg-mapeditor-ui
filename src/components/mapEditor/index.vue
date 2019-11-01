@@ -78,11 +78,11 @@
       </div>
       <div class="right-wraper">
         <div class="map-space">
-          <!-- <mapView
+          <mapView
             :curImg="curRes"
             :curTool="curTool"
             @absorb="handleMapViewAbsorb"
-          /> -->
+          />
         </div>
         <div class="tools-box">
           <palette

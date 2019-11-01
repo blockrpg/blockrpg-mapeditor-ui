@@ -64,7 +64,7 @@
         @mousemove.stop="() => {}">
       </div>
       <div
-        v-if="selectedOffset >= 0"
+        v-if="selectedOffset > 0"
         class="map-selected-frame"
         :style="autoMapSelectedFrameStyle"
         @mousemove.stop="() => {}">
@@ -74,6 +74,25 @@
 </template>
 
 <script>
+// 按键方向映射
+// 支持WSAD键
+// 支持键盘方向键
+// 支持虚拟键盘
+const KeyDirMap = {
+  ArrowUp: 0,
+  KeyW: 0,
+  Up: 0,
+  ArrowDown: 1,
+  KeyS: 1,
+  Down: 1,
+  ArrowLeft: 2,
+  KeyA: 2,
+  Left: 2,
+  ArrowRight: 3,
+  KeyD: 3,
+  Right: 3,
+};
+
 export default {
   name: 'mapSelector',
   props: {
@@ -90,7 +109,7 @@ export default {
       //#region 页面内容绑定数据
       mouseX: 0,
       mouseY: 0,
-      selectedOffset: -1,
+      selectedOffset: 0,
       showHover: false,
       //#endregion
       //#region 页面样式绑定数据
@@ -100,7 +119,12 @@ export default {
   watch: {
     curResId: {
       handler(nv, ov) {
-        this.selectedOffset = -1;
+        this.selectedOffset = 0;
+      },
+    },
+    selectedOffset: {
+      handler(nv, ov) {
+        this.$emit('change', nv);
       },
     },
   },
@@ -164,10 +188,36 @@ export default {
     // Hover上点击的选中事件
     handleMapHoverFrameClick() {
       this.selectedOffset = this.autoMouseGrid.offset;
-      this.$emit('change', this.selectedOffset);
+    },
+    // 真实键事件
+    handleKeyDown(e) {
+      this.moveByCode(e.code);
     },
     //#endregion
     //#region 业务逻辑方法
+    // 根据Code驱动玩家移动
+    moveByCode(code) {
+      if (this.selectedOffset > 0) {
+        const newDir = KeyDirMap[code];
+        if (isFinite(newDir)) {
+          const bakOffset = this.selectedOffset;
+          // 方向移动
+          if (newDir === 0) {
+            this.selectedOffset -= 8;
+          } else if (newDir === 1) {
+            this.selectedOffset += 8;
+          } else if (newDir === 2) {
+            this.selectedOffset -= 1;
+          } else if (newDir === 3) {
+            this.selectedOffset += 1;
+          }
+          // 越界恢复
+          if (this.selectedOffset < 1) {
+            this.selectedOffset = bakOffset;
+          }
+        }
+      }
+    },
     //#endregion
     //#region 接口访问方法
     //#endregion
@@ -179,8 +229,12 @@ export default {
     //#endregion
   },
   created() {},
-  mounted() {},
-  beforeDestroy() {},
+  mounted() {
+    document.addEventListener('keydown', this.handleKeyDown);
+  },
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.handleKeyDown);
+  },
   components: {},
 };
 </script>
