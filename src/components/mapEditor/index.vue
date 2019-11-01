@@ -89,7 +89,8 @@
             :curImg="curRes"
             :curGrid="curGrid"
           />
-          <gridEditor />
+          <gridEditor
+          />
           <toolBox
             v-model="curTool"
           />
@@ -123,7 +124,7 @@ export default {
       // 当前吸取的网格数据
       curGrid: {},
       // 当前选中的工具
-      curTool: 'pencil',
+      curTool: 'hand',
       //#endregion
       //#region 页面内容绑定数据
       //#endregion

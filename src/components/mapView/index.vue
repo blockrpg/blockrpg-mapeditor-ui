@@ -4,6 +4,7 @@
   position: relative;
   width: 100%;
   height: 100%;
+  background-color: #e5e5e5;
   overflow: hidden;
   .grids-wraper {
     position: absolute;
@@ -89,13 +90,13 @@ export default {
       // 随着拖拽，中心点坐标会变化
       centerX: 0,
       centerY: 0,
+      wraperX: 0,
+      wraperY: 0,
       // 记录拖拽事件的初始坐标
       startX: 0,
       startY: 0,
       // 当前渲染的网格
       grids: [],
-
-      enable: true,
       //#endregion
       //#region 页面样式绑定数据
       //#endregion
@@ -105,10 +106,7 @@ export default {
     // 当前视区覆盖的区块矩形
     autoBlockRect: {
       handler(nv, ov) {
-        if (this.enable) {
-          // this.enable = false;
-          this.updateMap(nv);
-        }
+        this.tryUpdateMap(nv);
       },
       immediate: true,
     },
@@ -150,7 +148,7 @@ export default {
     // 自动计算包裹区域样式
     autoWraperStyle() {
       const style = {};
-      style.transform = `translate(${-this.centerX}px, ${-this.centerY}px)`;
+      style.transform = `translate(${-this.wraperX}px, ${-this.wraperY}px)`;
       return style;
     },
     //#endregion
@@ -174,8 +172,8 @@ export default {
     },
     // 鼠标松开
     handleMouseUp(e) {
-      // 计算位置差之后偏移中心点
       if (this.curTool === 'hand') {
+        // 计算位置差之后偏移中心点
         const endX = e.clientX - this.$el.offsetLeft;
         const endY = e.clientY - this.$el.offsetTop;
         const diffX = endX - this.startX;
@@ -224,23 +222,31 @@ export default {
     },
     //#endregion
     //#region 业务逻辑方法
-    // 请求后端接口更新地图
-    async updateMap(rect) {
+    // 尝试更新地图
+    async tryUpdateMap(rect) {
       this.loading = true;
       try {
-        const result = await APIMapEditor.queryRect({
-          mapId: 'test',
-          ...rect,
-        });
-        if (result.success) {
-          const list = result.object || [];
-          // 把获取的block写入缓存
-          list.forEach((item) => {
-            const key = `${item.x}~${item.y}`;
-            this.blockBuffer[key] = item;
+        // 已缓存的Block的Ids
+        const existingBlockIds = Object.keys(this.blockBuffer);
+        const newBlocks = rect.Points.filter((pt) => existingBlockIds.every((id) => id !== pt.Id));
+        if (newBlocks.length > 0) {
+          const newRect = Rect.FromPoints(newBlocks);
+          const result = await APIMapEditor.queryRect({
+            mapId: 'test',
+            ...newRect,
           });
-          this.grids = this.readGridsFromBufferRect(this.autoGridRect);
+          if (result.success) {
+            const list = result.object || [];
+            // 把获取的block写入缓存
+            list.forEach((item) => {
+              const key = `${item.x}~${item.y}`;
+              this.blockBuffer[key] = item;
+            });
+          }
         }
+        this.wraperX = this.centerX;
+        this.wraperY = this.centerY;
+        this.grids = this.readGridsFromBufferRect(this.autoGridRect);
       } catch (e) {
         console.error(e);
       }
