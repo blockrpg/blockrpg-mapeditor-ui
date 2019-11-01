@@ -19,6 +19,17 @@ html, body {
 div {
   box-sizing: border-box;
 }
+.el-select-dropdown .el-select-dropdown__item {
+  height: 26px;
+  line-height: 26px;
+  font-size: 12px;
+  padding-left: 15px;
+  padding-right: 10px;
+}
+.el-select-dropdown .el-select-dropdown__list {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
 </style>
 
 <template>

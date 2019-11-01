@@ -54,7 +54,7 @@
       @mousemove="handleMouseMove"
       @mouseleave="handleMouseLeave">
       <img
-        :src="`/image/map/${this.mapId}.png`"
+        :src="`/image/map/${this.curResId}.png`"
       />
       <div
         v-if="autoShowHover"
@@ -78,9 +78,9 @@ export default {
   name: 'mapSelector',
   props: {
     // 传入的Map图片资源Id
-    mapId: {
-      type: Number,
-      default: 0,
+    curResId: {
+      type: String,
+      default: '0',
     },
   },
   data() {
@@ -97,7 +97,13 @@ export default {
       //#endregion
     };
   },
-  watch: {},
+  watch: {
+    curResId: {
+      handler(nv, ov) {
+        this.selectedOffset = -1;
+      },
+    },
+  },
   computed: {
     //#region 常量计算属性
     //#endregion
@@ -158,11 +164,7 @@ export default {
     // Hover上点击的选中事件
     handleMapHoverFrameClick() {
       this.selectedOffset = this.autoMouseGrid.offset;
-      this.$emit('change', {
-        resId: 0,
-        resNum: this.selectedOffset,
-        pass: true,
-      });
+      this.$emit('change', this.selectedOffset);
     },
     //#endregion
     //#region 业务逻辑方法

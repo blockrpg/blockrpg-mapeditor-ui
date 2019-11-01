@@ -45,40 +45,48 @@
 </style>
 
 <!--全局局部覆盖样式-->
-<style></style>
+<style>
+</style>
 
 <template>
   <div class="map-editor">
     <div class="header-box">
       <el-select
-        v-model="mapId"
+        v-model="curMapId"
         placeholder="请选择地图">
         <el-option label="test" value="test"></el-option>
       </el-select>
       <el-select
-        v-model="imageId"
+        v-model="curResId"
         placeholder="请选择素材图Id"
         style="margin-left: 10px">
         <el-option label="0" value="0"></el-option>
+        <el-option label="1" value="1"></el-option>
+        <el-option label="2" value="2"></el-option>
+        <el-option label="3" value="3"></el-option>
+        <el-option label="4" value="4"></el-option>
+        <el-option label="5" value="5"></el-option>
+        <el-option label="6" value="6"></el-option>
       </el-select>
     </div>
     <div class="content-box">
       <div class="left-wraper">
         <mapSelector
+          :curResId="curResId"
           @change="handleSelectChange"
         />
       </div>
       <div class="right-wraper">
         <div class="map-space">
-          <mapView
-            :curImg="curImg"
+          <!-- <mapView
+            :curImg="curRes"
             :curTool="curTool"
             @absorb="handleMapViewAbsorb"
-          />
+          /> -->
         </div>
         <div class="tools-box">
           <palette
-            :curImg="curImg"
+            :curImg="curRes"
             :curGrid="curGrid"
           />
           <gridEditor />
@@ -106,16 +114,18 @@ export default {
   data() {
     return {
       //#region 页面对象
-      // 当前选中的素材数据
-      curImg: {},
+      // 当前选中的地图Id
+      curMapId: 'test',
+      // 当前选中的素材资源Id
+      curResId: '0',
+      // 当前选中的素材数据（仅包含ResId以及ResNum）
+      curRes: {},
       // 当前吸取的网格数据
       curGrid: {},
       // 当前选中的工具
       curTool: 'pencil',
       //#endregion
       //#region 页面内容绑定数据
-      imageId: '',
-      mapId: '',
       //#endregion
       //#region 页面样式绑定数据
       //#endregion
@@ -133,9 +143,9 @@ export default {
   methods: {
     //#region 页面事件方法
     handleSelectChange(value) {
-      this.curImg = {
-        resId: value.resId,
-        resNum: value.resNum,
+      this.curRes = {
+        resId: this.curResId,
+        resNum: value,
       };
     },
     handleMapViewAbsorb(value) {
@@ -156,7 +166,7 @@ export default {
   created() {},
   mounted() {
     // 禁用鼠标右键事件
-    this.$el.oncontextmenu = function () {
+    this.$el.oncontextmenu = () => {
       event.returnValue = false;
     };
   },
