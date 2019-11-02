@@ -71,18 +71,19 @@
     </div>
     <div class="content-box">
       <div class="left-wraper">
-        <mapSelector
+        <!-- <mapSelector
           :curResId="curResId"
           @change="handleSelectChange"
-        />
+        /> -->
       </div>
       <div class="right-wraper">
         <div class="map-space">
-          <mapView
+          <gridEditor />
+          <!-- <mapView
             :curImg="curRes"
             :curTool="curTool"
             @absorb="handleMapViewAbsorb"
-          />
+          /> -->
         </div>
         <div class="tools-box">
           <palette

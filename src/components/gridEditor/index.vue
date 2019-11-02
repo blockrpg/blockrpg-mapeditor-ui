@@ -1,116 +1,130 @@
 <!--局部样式-->
 <style lang="scss" scoped>
 .grid-editor {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  background-color: #f5f5f5;
+  width: 300px;
+  height: 99px;
   padding: 10px;
+  font-size: 12px;
+  background-color: #e0e0e0;
   .editor-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    .editor-cell {
+    .editor-item {
       display: flex;
       align-items: center;
-      width: 120px;
-      .span-wraper {
-        width: 40px;
+      .label-div {
+        margin-right: 10px;
       }
     }
-    .editor-blank {
-      width: 15px;
-      min-width: 15px;
-    }
   }
-  .save-btn {
-    font-size: 12px;
+  .grid-frame {
+    box-sizing: content-box;
+    border: solid 1px #999;
+    border-top-color: #eee;
+    border-left-color: #eee;
+    background-color: #fff;
+    margin-right: 15px;
+  }
+}
+.mg-wraper {
+  width: 51px;
+  height: 51px;
+  border: solid 1px #333;
+  border-right: none;
+  border-bottom: none;
+  .mg-row {
+    width: 50px;
+    height: 10px;
+    display: flex;
+  }
+  .mg-cell {
+    width: 10px;
+    height: 10px;
+    box-sizing: content-box;
+    border: solid 1px #333;
+    border-top: none;
+    border-left: none;
   }
 }
 </style>
 
 <!--全局局部覆盖样式-->
 <style>
-.grid-editor *:not(.el-select) .el-input {
-  width: 80px;
-}
-.grid-editor .el-select .el-input {
-  width: 160px;
+.el-popover {
+  min-width: unset!important;
+  padding: 3px!important;
 }
 </style>
 
 <template>
   <div class="grid-editor">
     <div class="editor-row">
-      <div
-        class="editor-cell"
-        style="width: 200px">
-        <div class="span-wraper">
-          <span>事件: </span>
-        </div>
+      <mapGrid
+        :value="autoGrid"
+        class="grid-frame"
+      />
+      <div class="editor-item">
+        <div class="label-div">事件: </div>
         <el-select
-          v-model="formData.eventId">
-          <el-option value="事件1" name="事件1">事件1</el-option>
-          <el-option value="事件2" name="事件2">事件2</el-option>
+          style="width: 193px"
+          v-model="formData.eventId"
+          clearable
+          placeholder="网格触发的事件">
+          <el-option name="事件1" value="事件1"></el-option>
+          <el-option name="事件2" value="事件2"></el-option>
         </el-select>
       </div>
-      <button class="save-btn">保存</button>
     </div>
     <div
       class="editor-row"
-      style="margin-top: 5px;margin-bottom: 5px">
-      <div class="editor-cell">
-        <div class="span-wraper">
-          <span>Id: </span>
-        </div>
-        <el-input
-          v-model="formData.resId"
-          size="mini"
-          clearable
-        />
+      style="margin-top: 10px">
+      <div
+        class="editor-item"
+        style="margin-right: 15px">
+        <div class="label-div">抬升: </div>
+        <el-checkbox v-model="formData.raised" />
       </div>
-      <div class="editor-blank"></div>
-      <div class="editor-cell">
-        <div class="span-wraper">
-          <span>序号: </span>
-        </div>
-        <el-input
-          v-model="formData.resNum"
-          size="mini"
-          clearable
-        />
-      </div>
-    </div>
-    <div
-      class="editor-row">
-      <div class="editor-cell">
-        <div class="span-wraper">
-          <span>Mask: </span>
-        </div>
+      <div class="editor-item">
+        <div class="label-div">PassMask: </div>
         <el-input
           v-model="formData.passMask"
-          size="mini"
+          placeholder="Mask数"
+          style="width: 110px"
           clearable
+          @clear="handlePassMaskClear"
+          @dblclick.native="handleDBLClick"
         />
-      </div>
-      <div class="editor-blank"></div>
-      <div class="editor-cell">
-        <div class="span-wraper">
-          <span>抬升: </span>
-        </div>
-        <el-checkbox
-          v-model="formData.raised"
-          size="mini"
-        />
+        <el-popover
+          trigger="hover"
+          placement="right">
+          <passMask
+            v-model="formData.passMask"
+            :resId="formData.resId"
+            :resNum="formData.resNum"
+            :size="58"
+          />
+          <button slot="reference" style="margin-left: 5px">图</button>
+        </el-popover>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { GridMeta } from 'blockrpg-core/built/Model/MapBlock/Entity/GridMeta';
+import mapGrid from '@/components/mapGrid';
+import passMask from '@/components/passMask';
+
 export default {
   name: 'grid-editor',
-  props: {},
+  props: {
+    value: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+  },
   data() {
     return {
       //#region 页面对象
@@ -118,11 +132,12 @@ export default {
       //#region 页面内容绑定数据
       formData: {
         resId: 0,
-        resNum: 0,
-        passMask: 0,
+        resNum: 1,
         raised: false,
-        eventId: undefined,
+        passMask: 0,
+        eventId: '事件2',
       },
+      test: true,
       //#endregion
       //#region 页面样式绑定数据
       //#endregion
@@ -133,12 +148,23 @@ export default {
     //#region 常量计算属性
     //#endregion
     //#region 数据转换计算属性
+    autoGrid() {
+      return {
+        map: this.formData,
+      };
+    },
     //#endregion
     //#region 样式计算属性
     //#endregion
   },
   methods: {
     //#region 页面事件方法
+    handleDBLClick() {
+      this.formData.passMask = GridMeta.PassAll;
+    },
+    handlePassMaskClear() {
+      this.formData.passMask = GridMeta.UnPassAll;
+    },
     //#endregion
     //#region 业务逻辑方法
     //#endregion
@@ -153,6 +179,9 @@ export default {
   },
   created() {},
   mounted() {},
-  components: {},
+  components: {
+    mapGrid,
+    passMask,
+  },
 };
 </script>
