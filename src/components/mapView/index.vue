@@ -84,6 +84,10 @@ export default {
       loading: true,
       // 块缓存
       blockBuffer: {},
+      // 更新队列
+      updateQueue: [],
+      // 更新定时器
+      queuePushTimer: -1,
       //#endregion
       //#region 页面内容绑定数据
       // 初始的中心点坐标为(0, 0)
@@ -192,16 +196,15 @@ export default {
       if (this.curTool === 'pencil') {
         if (button === 0) {
           this.blockBuffer[blockId].grids[offset].map = {
-            resId: this.curImg.resId,
-            resNum: this.curImg.resNum,
+            ...this.curImg,
           };
         } else if (button === 2) {
           this.blockBuffer[blockId].grids[offset].prop = {
-            resId: this.curImg.resId,
-            resNum: this.curImg.resNum,
+            ...this.curImg,
           };
         }
         this.grids = this.readGridsFromBufferRect(this.autoGridRect);
+        this.updateQueuePush(blockId);
       } else if (this.curTool === 'eyedropper') {
         this.$emit('absorb', {
           map: grid.map,
@@ -218,6 +221,7 @@ export default {
           delete this.blockBuffer[blockId].grids[offset].prop;
         }
         this.grids = this.readGridsFromBufferRect(this.autoGridRect);
+        this.updateQueuePush(blockId);
       }
     },
     //#endregion
@@ -253,6 +257,27 @@ export default {
       this.$nextTick(() => {
         this.loading = false;
       });
+    },
+    // 块更新请求入队
+    updateQueuePush(blockId) {
+      clearTimeout(this.queuePushTimer);
+      if (this.updateQueue.every((id) => id !== blockId)) {
+        this.updateQueue.push(blockId);
+      }
+      if (this.updateQueue.length > 0) {
+        this.queuePushTimer = setTimeout(async () => {
+          const paramsList = this.updateQueue.map((id) => ({
+            mapId: 'test',
+            x: Number(id.split('~')[0]),
+            y: Number(id.split('~')[1]),
+            grids: this.blockBuffer[id].grids,
+          }));
+          console.log('更新', paramsList);
+          const pms = paramsList.map((params) => APIMapEditor.updateBlock(params));
+          await Promise.all(pms);
+          this.updateQueue = [];
+        }, 3000);
+      }
     },
     //#endregion
     //#region 接口访问方法

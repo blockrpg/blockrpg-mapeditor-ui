@@ -57,9 +57,10 @@
         <el-option label="test" value="test"></el-option>
       </el-select>
       <el-select
-        v-model="curResId"
+        v-model="curGrid.resId"
+        style="margin-left: 10px"
         placeholder="请选择素材图Id"
-        style="margin-left: 10px">
+        @change="handleResIdChange">
         <el-option label="0" value="0"></el-option>
         <el-option label="1" value="1"></el-option>
         <el-option label="2" value="2"></el-option>
@@ -71,26 +72,22 @@
     </div>
     <div class="content-box">
       <div class="left-wraper">
-        <!-- <mapSelector
-          :curResId="curResId"
+        <mapSelector
+          :resId="curGrid.resId"
           @change="handleSelectChange"
-        /> -->
+        />
       </div>
       <div class="right-wraper">
         <div class="map-space">
-          <gridEditor />
-          <!-- <mapView
-            :curImg="curRes"
+          <mapView
+            :curImg="curGrid"
             :curTool="curTool"
             @absorb="handleMapViewAbsorb"
-          /> -->
+          />
         </div>
         <div class="tools-box">
-          <palette
-            :curImg="curRes"
-            :curGrid="curGrid"
-          />
           <gridEditor
+            v-model="curGrid"
           />
           <toolBox
             v-model="curTool"
@@ -116,14 +113,16 @@ export default {
   data() {
     return {
       //#region 页面对象
+      // 当前选中的网格数据
+      curGrid: {
+        resId: 0,
+        resNum: 0,
+        raised: false,
+        passMask: 0,
+        eventId: undefined,
+      },
       // 当前选中的地图Id
       curMapId: 'test',
-      // 当前选中的素材资源Id
-      curResId: '0',
-      // 当前选中的素材数据（仅包含ResId以及ResNum）
-      curRes: {},
-      // 当前吸取的网格数据
-      curGrid: {},
       // 当前选中的工具
       curTool: 'hand',
       //#endregion
@@ -133,7 +132,14 @@ export default {
       //#endregion
     };
   },
-  watch: {},
+  watch: {
+    curGrid: {
+      handler(nv) {
+        console.log(nv);
+      },
+      deep: true,
+    },
+  },
   computed: {
     //#region 常量计算属性
     //#endregion
@@ -145,13 +151,13 @@ export default {
   methods: {
     //#region 页面事件方法
     handleSelectChange(value) {
-      this.curRes = {
-        resId: this.curResId,
-        resNum: value,
-      };
+      this.curGrid.resNum = value;
     },
     handleMapViewAbsorb(value) {
-      this.curGrid = JSON.parse(JSON.stringify(value));
+
+    },
+    handleResIdChange(nv) {
+      this.curGrid.resId = Number(nv);
     },
     //#endregion
     //#region 业务逻辑方法

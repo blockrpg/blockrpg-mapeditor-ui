@@ -26,26 +26,6 @@
     margin-right: 15px;
   }
 }
-.mg-wraper {
-  width: 51px;
-  height: 51px;
-  border: solid 1px #333;
-  border-right: none;
-  border-bottom: none;
-  .mg-row {
-    width: 50px;
-    height: 10px;
-    display: flex;
-  }
-  .mg-cell {
-    width: 10px;
-    height: 10px;
-    box-sizing: content-box;
-    border: solid 1px #333;
-    border-top: none;
-    border-left: none;
-  }
-}
 </style>
 
 <!--全局局部覆盖样式-->
@@ -69,7 +49,7 @@
           style="width: 193px"
           v-model="formData.eventId"
           clearable
-          placeholder="网格触发的事件">
+          placeholder="网格触发事件">
           <el-option name="事件1" value="事件1"></el-option>
           <el-option name="事件2" value="事件2"></el-option>
         </el-select>
@@ -132,18 +112,30 @@ export default {
       //#region 页面内容绑定数据
       formData: {
         resId: 0,
-        resNum: 1,
+        resNum: 0,
         raised: false,
         passMask: 0,
-        eventId: '事件2',
+        eventId: undefined,
       },
-      test: true,
       //#endregion
       //#region 页面样式绑定数据
       //#endregion
     };
   },
-  watch: {},
+  watch: {
+    value: {
+      handler(nv) {
+        this.formData = nv;
+      },
+      immediate: true,
+    },
+    formData: {
+      handler(nv) {
+        this.$emit('input', nv);
+      },
+      deep: true,
+    },
+  },
   computed: {
     //#region 常量计算属性
     //#endregion

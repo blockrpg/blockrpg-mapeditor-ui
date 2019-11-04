@@ -54,7 +54,7 @@
       @mousemove="handleMouseMove"
       @mouseleave="handleMouseLeave">
       <img
-        :src="`/image/map/${this.curResId}.png`"
+        :src="`/image/map/${this.resId}.png`"
       />
       <div
         v-if="autoShowHover"
@@ -97,9 +97,9 @@ export default {
   name: 'mapSelector',
   props: {
     // 传入的Map图片资源Id
-    curResId: {
-      type: String,
-      default: '0',
+    resId: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
@@ -117,7 +117,7 @@ export default {
     };
   },
   watch: {
-    curResId: {
+    resId: {
       handler(nv, ov) {
         this.selectedOffset = 0;
       },
